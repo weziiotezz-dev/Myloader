@@ -1,344 +1,222 @@
 
---========================================================
--- XT HUB | ANIME ADVENTURES
--- LOADER v1.3.1 - UI REPLICA
---========================================================
+-- XT HUB | ANIME ADVENTURES | BLACK EDITION
 
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
+local P=game:GetService("Players").LocalPlayer
+local T=game:GetService("TweenService")
+local CP=game:GetService("ContentProvider")
+local URL="https://raw.githubusercontent.com/weziiotez-dev/xt-hub/main/crazy.lua"
+local DISCORD="https://discord.gg/AUqahYX74"
 
-local Player = Players.LocalPlayer
-local PlayerGui = Player:WaitForChild("PlayerGui")
+local G=Instance.new("ScreenGui")
+G.Name="XTLoading"
+G.ResetOnSpawn=false
+G.IgnoreGuiInset=true
+G.Parent=P:WaitForChild("PlayerGui")
 
-local Old = PlayerGui:FindFirstChild("XTKeyLoader")
-if Old then Old:Destroy() end
+local M=Instance.new("Frame",G)
+M.Size=UDim2.fromOffset(760,630)
+M.Position=UDim2.fromScale(.5,.5)
+M.AnchorPoint=Vector2.new(.5,.5)
+M.BackgroundColor3=Color3.fromRGB(7,7,12)
+M.BorderSizePixel=0
+Instance.new("UICorner",M).CornerRadius=UDim.new(0,20)
+local S=Instance.new("UIStroke",M)
+S.Color=Color3.fromRGB(90,55,170)
+S.Thickness=1.5
 
-local GUI = Instance.new("ScreenGui")
-GUI.Name = "XTKeyLoader"
-GUI.ResetOnSpawn = false
-GUI.IgnoreGuiInset = true
-GUI.DisplayOrder = 999
-GUI.Parent = PlayerGui
+local Z=Instance.new("UIScale",M)
+local function resize()
+ local v=workspace.CurrentCamera.ViewportSize
+ Z.Scale=math.clamp(math.min(v.X/820,v.Y/680),.45,1)
+end
+resize()
+workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
 
--- Background overlay
-local Overlay = Instance.new("Frame")
-Overlay.Size = UDim2.fromScale(1, 1)
-Overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Overlay.BackgroundTransparency = 0.38
-Overlay.BorderSizePixel = 0
-Overlay.Parent = GUI
-
--- Main window
-local Main = Instance.new("Frame")
-Main.Name = "Main"
-Main.Size = UDim2.fromOffset(936, 638)
-Main.Position = UDim2.fromScale(0.5, 0.5)
-Main.AnchorPoint = Vector2.new(0.5, 0.5)
-Main.BackgroundColor3 = Color3.fromRGB(12, 10, 20)
-Main.BorderSizePixel = 0
-Main.Parent = Overlay
-
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 27)
-
-local MainStroke = Instance.new("UIStroke")
-MainStroke.Color = Color3.fromRGB(105, 55, 105)
-MainStroke.Thickness = 1.5
-MainStroke.Parent = Main
-
-local UIScale = Instance.new("UIScale")
-UIScale.Parent = Main
-
-local function UpdateScale()
-    local camera = workspace.CurrentCamera
-    if not camera then return end
-
-    local viewport = camera.ViewportSize
-    UIScale.Scale = math.clamp(
-        math.min(viewport.X / 1000, viewport.Y / 720),
-        0.48,
-        1
-    )
+local function label(parent,txt,pos,size,color,bold)
+ local x=Instance.new("TextLabel",parent)
+ x.BackgroundTransparency=1
+ x.Text=txt
+ x.Position=pos
+ x.Size=size
+ x.TextColor3=color or Color3.fromRGB(230,230,245)
+ x.Font=bold and Enum.Font.GothamBold or Enum.Font.Gotham
+ x.TextSize=15
+ x.TextXAlignment=Enum.TextXAlignment.Left
+ return x
 end
 
-UpdateScale()
+-- HEADER
+label(M,"XT",UDim2.fromOffset(38,48),UDim2.fromOffset(90,45),
+ Color3.fromRGB(130,115,255),true).TextSize=35
+label(M,"Opening Anime Adventures",UDim2.fromOffset(150,35),
+ UDim2.fromOffset(450,35),Color3.fromRGB(245,245,255),true).TextSize=19
+label(M,"XT HUB | V0.6.7",UDim2.fromOffset(150,72),
+ UDim2.fromOffset(300,25),Color3.fromRGB(135,130,165)).TextSize=13
 
-workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(UpdateScale)
+local Min=Instance.new("TextButton",M)
+Min.Size=UDim2.fromOffset(48,48)
+Min.Position=UDim2.new(1,-70,0,28)
+Min.Text="—"
+Min.TextColor3=Color3.fromRGB(190,180,230)
+Min.BackgroundColor3=Color3.fromRGB(27,23,43)
+Instance.new("UICorner",Min).CornerRadius=UDim.new(0,12)
+Min.MouseButton1Click:Connect(function() M.Visible=false end)
 
--- Header
-local Header = Instance.new("Frame")
-Header.Size = UDim2.new(1, 0, 0, 98)
-Header.BackgroundColor3 = Color3.fromRGB(17, 14, 26)
-Header.BorderSizePixel = 0
-Header.Parent = Main
+local Line=Instance.new("Frame",M)
+Line.Position=UDim2.fromOffset(0,110)
+Line.Size=UDim2.new(1,0,0,2)
+Line.BackgroundColor3=Color3.fromRGB(100,65,190)
+Line.BorderSizePixel=0
 
-Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 25)
+-- PROGRESS
+label(M,"LOADING PROGRESS",UDim2.fromOffset(40,140),
+ UDim2.fromOffset(300,25),Color3.fromRGB(150,145,185)).TextSize=14
 
-local HeaderCover = Instance.new("Frame")
-HeaderCover.Size = UDim2.new(1, 0, 0, 25)
-HeaderCover.Position = UDim2.new(0, 0, 1, -25)
-HeaderCover.BackgroundColor3 = Header.BackgroundColor3
-HeaderCover.BorderSizePixel = 0
-HeaderCover.Parent = Header
+local BG=Instance.new("Frame",M)
+BG.Position=UDim2.fromOffset(40,185)
+BG.Size=UDim2.new(1,-80,0,12)
+BG.BackgroundColor3=Color3.fromRGB(35,32,49)
+BG.BorderSizePixel=0
+Instance.new("UICorner",BG).CornerRadius=UDim.new(1,0)
 
-local Logo = Instance.new("TextLabel")
-Logo.Size = UDim2.fromOffset(105, 65)
-Logo.Position = UDim2.fromOffset(35, 14)
-Logo.BackgroundTransparency = 1
-Logo.Text = "XT"
-Logo.Font = Enum.Font.GothamBlack
-Logo.TextSize = 57
-Logo.TextColor3 = Color3.fromRGB(245, 245, 255)
-Logo.Parent = Header
+local Bar=Instance.new("Frame",BG)
+Bar.Size=UDim2.fromScale(0,1)
+Bar.BackgroundColor3=Color3.fromRGB(130,95,255)
+Bar.BorderSizePixel=0
+Instance.new("UICorner",Bar).CornerRadius=UDim.new(1,0)
 
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.fromOffset(450, 35)
-Title.Position = UDim2.fromOffset(155, 22)
-Title.BackgroundTransparency = 1
-Title.Text = "Anime Adventures"
-Title.TextColor3 = Color3.fromRGB(245, 242, 250)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 23
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = Header
+local Status=label(M,"Initializing XT HUB...",
+ UDim2.fromOffset(40,215),UDim2.new(1,-80,0,28),
+ Color3.fromRGB(165,160,200))
 
-local Version = Instance.new("TextLabel")
-Version.Size = UDim2.fromOffset(300, 25)
-Version.Position = UDim2.fromOffset(155, 56)
-Version.BackgroundTransparency = 1
-Version.Text = "Loader v1.3.1"
-Version.TextColor3 = Color3.fromRGB(145, 135, 165)
-Version.Font = Enum.Font.Gotham
-Version.TextSize = 16
-Version.TextXAlignment = Enum.TextXAlignment.Left
-Version.Parent = Header
+-- ACTIVITY
+label(M,"ACTIVITY",UDim2.fromOffset(40,265),
+ UDim2.fromOffset(300,25),Color3.fromRGB(150,145,185)).TextSize=14
 
-local HeaderLine = Instance.new("Frame")
-HeaderLine.Size = UDim2.new(1, 0, 0, 2)
-HeaderLine.Position = UDim2.new(0, 0, 1, -1)
-HeaderLine.BackgroundColor3 = Color3.fromRGB(120, 65, 130)
-HeaderLine.BorderSizePixel = 0
-HeaderLine.Parent = Header
+local Panel=Instance.new("Frame",M)
+Panel.Position=UDim2.fromOffset(40,300)
+Panel.Size=UDim2.new(1,-80,0,200)
+Panel.BackgroundColor3=Color3.fromRGB(17,16,27)
+Panel.BorderSizePixel=0
+Panel.ClipsDescendants=true
+Instance.new("UICorner",Panel).CornerRadius=UDim.new(0,12)
+Instance.new("UIStroke",Panel).Color=Color3.fromRGB(42,37,65)
 
--- Close button
-local Close = Instance.new("TextButton")
-Close.Size = UDim2.fromOffset(45, 45)
-Close.Position = UDim2.new(1, -65, 0, 26)
-Close.BackgroundTransparency = 1
-Close.Text = "×"
-Close.TextColor3 = Color3.fromRGB(185, 180, 195)
-Close.Font = Enum.Font.Gotham
-Close.TextSize = 34
-Close.Parent = Header
+local List=Instance.new("UIListLayout",Panel)
+List.Padding=UDim.new(0,10)
+local Pad=Instance.new("UIPadding",Panel)
+Pad.PaddingTop=UDim.new(0,14)
+Pad.PaddingLeft=UDim.new(0,17)
 
-Close.MouseButton1Click:Connect(function()
-    GUI:Destroy()
-end)
-
--- Step rail
-local Steps = {
-    "Get a free key",
-    "Open the link in your browser",
-    "Press START, watch ads, GET A NEW KEY",
-    "Paste the key here"
-}
-
-local StepY = {150, 265, 333, 402}
-
-local Rail = Instance.new("Frame")
-Rail.Size = UDim2.fromOffset(4, 275)
-Rail.Position = UDim2.fromOffset(60, 171)
-Rail.BackgroundColor3 = Color3.fromRGB(48, 43, 61)
-Rail.BorderSizePixel = 0
-Rail.Parent = Main
-
-for i, text in ipairs(Steps) do
-    local Circle = Instance.new("Frame")
-    Circle.Size = UDim2.fromOffset(48, 48)
-    Circle.Position = UDim2.fromOffset(38, StepY[i] - 25)
-    Circle.BackgroundColor3 = i == 1
-        and Color3.fromRGB(204, 75, 177)
-        or Color3.fromRGB(39, 38, 53)
-    Circle.BorderSizePixel = 0
-    Circle.Parent = Main
-    Instance.new("UICorner", Circle).CornerRadius = UDim.new(1, 0)
-
-    if i == 1 then
-        local Gradient = Instance.new("UIGradient")
-        Gradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(244, 91, 174)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(135, 88, 245))
-        })
-        Gradient.Parent = Circle
-    end
-
-    local Number = Instance.new("TextLabel")
-    Number.Size = UDim2.fromScale(1, 1)
-    Number.BackgroundTransparency = 1
-    Number.Text = tostring(i)
-    Number.TextColor3 = i == 1
-        and Color3.new(1, 1, 1)
-        or Color3.fromRGB(130, 125, 150)
-    Number.Font = Enum.Font.GothamBold
-    Number.TextSize = 17
-    Number.Parent = Circle
-
-    local StepLabel = Instance.new("TextLabel")
-    StepLabel.Size = UDim2.fromOffset(740, 35)
-    StepLabel.Position = UDim2.fromOffset(105, StepY[i] - 17)
-    StepLabel.BackgroundTransparency = 1
-    StepLabel.Text = text
-    StepLabel.TextColor3 = i == 1
-        and Color3.fromRGB(245, 240, 250)
-        or Color3.fromRGB(165, 160, 180)
-    StepLabel.Font = Enum.Font.GothamBold
-    StepLabel.TextSize = i == 3 and 17 or 19
-    StepLabel.TextXAlignment = Enum.TextXAlignment.Left
-    StepLabel.Parent = Main
+local function activity(msg,ok)
+ local c=ok and Color3.fromRGB(100,220,160)
+  or Color3.fromRGB(180,175,205)
+ label(Panel,msg,UDim2.new(),UDim2.new(1,-25,0,22),c).TextSize=13
 end
 
--- Gradient button helper
-local function CreateGradientButton(name, text, position, size)
-    local Button = Instance.new("TextButton")
-    Button.Name = name
-    Button.Size = size
-    Button.Position = position
-    Button.BackgroundColor3 = Color3.fromRGB(35, 30, 49)
-    Button.BorderSizePixel = 0
-    Button.Text = ""
-    Button.AutoButtonColor = false
-    Button.Parent = Main
+-- DISCORD
+label(M,"XT HUB COMMUNITY",UDim2.fromOffset(40,515),
+ UDim2.fromOffset(250,22),Color3.fromRGB(160,145,210),true).TextSize=13
 
-    Instance.new("UICorner", Button).CornerRadius = UDim.new(0, 17)
+local DiscordBox=Instance.new("TextBox",M)
+DiscordBox.Position=UDim2.fromOffset(40,545)
+DiscordBox.Size=UDim2.new(1,-190,0,48)
+DiscordBox.BackgroundColor3=Color3.fromRGB(22,20,34)
+DiscordBox.Text=DISCORD
+DiscordBox.TextColor3=Color3.fromRGB(190,180,230)
+DiscordBox.TextSize=13
+DiscordBox.Font=Enum.Font.Gotham
+DiscordBox.ClearTextOnFocus=false
+DiscordBox.TextEditable=true
+DiscordBox.TextXAlignment=Enum.TextXAlignment.Center
+Instance.new("UICorner",DiscordBox).CornerRadius=UDim.new(0,10)
 
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Color3.fromRGB(195, 90, 170)
-    Stroke.Thickness = 1.7
-    Stroke.Parent = Button
+local Copy=Instance.new("TextButton",M)
+Copy.Position=UDim2.new(1,-135,0,545)
+Copy.Size=UDim2.fromOffset(95,48)
+Copy.BackgroundColor3=Color3.fromRGB(85,55,155)
+Copy.Text="COPY"
+Copy.TextColor3=Color3.new(1,1,1)
+Copy.Font=Enum.Font.GothamBold
+Copy.TextSize=13
+Instance.new("UICorner",Copy).CornerRadius=UDim.new(0,10)
 
-    local Gradient = Instance.new("UIGradient")
-    Gradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(225, 87, 165)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(113, 78, 220))
-    })
-    Gradient.Rotation = 0
-    Gradient.Parent = Stroke
+Copy.MouseButton1Click:Connect(function()
+ if typeof(setclipboard)=="function" then
+  local ok=pcall(setclipboard,DISCORD)
+  Copy.Text=ok and "COPIED!" or "SELECT LINK"
+ else
+  DiscordBox:CaptureFocus()
+  DiscordBox.CursorPosition=#DISCORD+1
+  Copy.Text="SELECT LINK"
+ end
+ task.wait(1.5)
+ Copy.Text="COPY"
+end)
 
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.fromScale(1, 1)
-    Label.BackgroundTransparency = 1
-    Label.Text = text
-    Label.TextColor3 = Color3.fromRGB(245, 240, 250)
-    Label.Font = Enum.Font.GothamBold
-    Label.TextSize = 17
-    Label.Parent = Button
-
-    return Button, Label
+local function progress(n,msg)
+ Status.Text=msg
+ T:Create(Bar,TweenInfo.new(.5),{
+  Size=UDim2.fromScale(n,1)
+ }):Play()
 end
 
--- Linkvertise button
-local LinkButton = CreateGradientButton(
-    "Linkvertise",
-    "▢   Linkvertise",
-    UDim2.fromOffset(105, 175),
-    UDim2.fromOffset(390, 68)
-)
-
--- Lootlabs button
-local LootButton = CreateGradientButton(
-    "Lootlabs",
-    "▢   Lootlabs",
-    UDim2.fromOffset(515, 175),
-    UDim2.fromOffset(390, 68)
-)
-
--- Key input
-local Input = Instance.new("TextBox")
-Input.Name = "KeyInput"
-Input.Size = UDim2.fromOffset(525, 73)
-Input.Position = UDim2.fromOffset(105, 445)
-Input.BackgroundColor3 = Color3.fromRGB(29, 28, 40)
-Input.BorderSizePixel = 0
-Input.PlaceholderText = "   ⚿   Paste your key"
-Input.PlaceholderColor3 = Color3.fromRGB(125, 120, 145)
-Input.Text = ""
-Input.TextColor3 = Color3.fromRGB(245, 240, 255)
-Input.Font = Enum.Font.Gotham
-Input.TextSize = 17
-Input.ClearTextOnFocus = false
-Input.TextXAlignment = Enum.TextXAlignment.Left
-Input.Parent = Main
-Instance.new("UICorner", Input).CornerRadius = UDim.new(0, 17)
-
--- Load with key
-local LoadButton, LoadLabel = CreateGradientButton(
-    "LoadWithKey",
-    "Load with key",
-    UDim2.fromOffset(650, 445),
-    UDim2.fromOffset(255, 73)
-)
-
-LoadLabel.TextSize = 18
-
--- Lifetime key button
-local Lifetime = Instance.new("TextButton")
-Lifetime.Name = "LifetimeKey"
-Lifetime.Size = UDim2.fromOffset(800, 62)
-Lifetime.Position = UDim2.fromOffset(105, 537)
-Lifetime.BackgroundColor3 = Color3.fromRGB(29, 28, 40)
-Lifetime.BorderSizePixel = 0
-Lifetime.Text = "🛒   Don't want ads?  Buy Lifetime key"
-Lifetime.TextColor3 = Color3.fromRGB(190, 185, 205)
-Lifetime.Font = Enum.Font.Gotham
-Lifetime.TextSize = 17
-Lifetime.Parent = Main
-Instance.new("UICorner", Lifetime).CornerRadius = UDim.new(0, 17)
-
--- Button hover/tap animation
-local function AnimateButton(button)
-    local original = button.BackgroundColor3
-
-    button.MouseEnter:Connect(function()
-        TweenService:Create(
-            button,
-            TweenInfo.new(0.15),
-            {BackgroundColor3 = Color3.fromRGB(48, 38, 65)}
-        ):Play()
-    end)
-
-    button.MouseLeave:Connect(function()
-        TweenService:Create(
-            button,
-            TweenInfo.new(0.15),
-            {BackgroundColor3 = original}
-        ):Play()
-    end)
+local function stage(msg,n)
+ activity("• "..msg)
+ progress(n,msg)
+ task.wait(5)
 end
 
-AnimateButton(LinkButton)
-AnimateButton(LootButton)
-AnimateButton(LoadButton)
-AnimateButton(Lifetime)
+-- LOADING AND AUTO START
+local success,err=pcall(function()
+ activity("XT HUB loader initialized")
 
--- These actions need your real key-system URLs
-LinkButton.MouseButton1Click:Connect(function()
-    warn("Linkvertise URL has not been configured.")
+ stage("Waiting for Character...",.15)
+ local C=P.Character or P.CharacterAdded:Wait()
+ C:WaitForChild("Humanoid")
+ activity("✓ Character successfully loaded",true)
+
+ stage("Preloading Assets...",.40)
+ local assets={}
+ for _,v in ipairs(game:GetDescendants()) do
+  if v:IsA("Decal") or v:IsA("Texture")
+  or v:IsA("ImageLabel") or v:IsA("ImageButton")
+  or v:IsA("Sound") then
+   table.insert(assets,v)
+  end
+ end
+ CP:PreloadAsync(assets)
+ activity("✓ Assets preload finished",true)
+
+ stage("Setting up XT HUB...",.65)
+ activity("✓ Setup completed",true)
+
+ progress(.85,"Waiting for XT to respond...")
+ activity("• Waiting for XT to respond...")
+ task.wait(3)
+
+ progress(.95,"Starting XT HUB...")
+ activity("• Starting main script...")
+ task.wait(2)
+
+ local source=game:HttpGet(URL)
+ assert(type(source)=="string" and #source>0,"Empty script")
+ local execute=loadstring(source)
+ assert(type(execute)=="function","Script compilation failed")
+ execute()
+
+ progress(1,"XT HUB started!")
+ activity("✓ Script execution returned",true)
+ task.wait(1.5)
+ G:Destroy()
 end)
 
-LootButton.MouseButton1Click:Connect(function()
-    warn("Lootlabs URL has not been configured.")
-end)
+if not success then
+ Status.Text="Loading failed"
+ activity("✗ "..tostring(err))
+ warn("[XT HUB ERROR] "..tostring(err))
+end
 
-Lifetime.MouseButton1Click:Connect(function()
-    warn("Lifetime key purchase URL has not been configured.")
-end)
-
-LoadButton.MouseButton1Click:Connect(function()
-    if Input.Text:gsub("%s+", "") == "" then
-        LoadLabel.Text = "Please enter your key"
-        task.wait(1.5)
-        LoadLabel.Text = "Load with key"
-        return
-    end
 
     -- Real key validation must be connected here.
     LoadLabel.Text = "Key validation not configured"
